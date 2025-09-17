@@ -28,3 +28,109 @@
     <script src="script.js"></script>
   </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Birthday Cake 🎂</title>
+  <style>
+    body {
+      background: #fff0f6;
+      font-family: cursive, sans-serif;
+      text-align: center;
+    }
+    h1 {
+      color: hotpink;
+      margin-top: 20px;
+    }
+    #cake {
+      position: relative;
+      margin: 40px auto;
+      width: 300px;
+      height: 200px;
+      background: #ffb347;
+      border-radius: 10px;
+    }
+    .candle {
+      width: 10px;
+      height: 40px;
+      background: #fff;
+      position: absolute;
+      bottom: 200px;
+      border-radius: 3px;
+    }
+    .flame {
+      width: 12px;
+      height: 20px;
+      background: radial-gradient(ellipse at center, yellow 0%, orange 70%, transparent 100%);
+      border-radius: 50%;
+      position: absolute;
+      top: -20px;
+      left: -1px;
+      animation: flicker 0.2s infinite alternate;
+    }
+    @keyframes flicker {
+      from { transform: scale(1); opacity: 1; }
+      to   { transform: scale(0.9); opacity: 0.8; }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎉 HAPPY BIRTHDAY MY LOVE 🎉</h1>
+  <div id="cake"></div>
+
+  <script>
+    const cake = document.getElementById("cake");
+    let candles = 16; // number of candles
+
+    function addCandle(x) {
+      const candle = document.createElement("div");
+      candle.classList.add("candle");
+      candle.style.left = x + "px";
+
+      const flame = document.createElement("div");
+      flame.classList.add("flame");
+
+      candle.appendChild(flame);
+      cake.appendChild(candle);
+    }
+
+    // place candles evenly across cake
+    window.onload = function() {
+      const spacing = cake.offsetWidth / (candles + 1);
+      for (let i = 1; i <= candles; i++) {
+        addCandle(i * spacing);
+      }
+      startMic();
+    };
+
+    // microphone to blow out candles
+    function startMic() {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const analyser = audioCtx.createAnalyser();
+          const mic = audioCtx.createMediaStreamSource(stream);
+          mic.connect(analyser);
+
+          const data = new Uint8Array(analyser.frequencyBinCount);
+
+          function detectBlow() {
+            analyser.getByteFrequencyData(data);
+            let volume = data.reduce((a, b) => a + b) / data.length;
+            if (volume > 40) { // sensitivity
+              blowOut();
+            }
+            requestAnimationFrame(detectBlow);
+          }
+          detectBlow();
+        });
+    }
+
+    function blowOut() {
+      const flames = document.querySelectorAll(".flame");
+      flames.forEach(flame => flame.remove());
+    }
+  </script>
+</body>
+</html>
